@@ -7,7 +7,7 @@
     "type": "flarum-extension",
     "license": "Unlicense",
     "require": {
-        "flarum/core": "^1.2.0"
+        "flarum/core": "^1.6"
     },
     "authors": [
         {
@@ -24,11 +24,12 @@
     "extra": {
         "flarum-extension": {
             "title": "Websocket",
-            "category": "",
+            "category": "feature",
             "icon": {
-                "name": "",
-                "color": "",
-                "backgroundColor": ""
+                "image": "icon.png",
+                "backgroundSize": "100%",
+                "backgroundPosition": "center",
+                "backgroundRepeat": "no-repeat"
             }
         }
     }
