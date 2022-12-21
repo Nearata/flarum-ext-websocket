@@ -1,7 +1,9 @@
 nearata-websocket:
-  # For more details on the format
-  # Checkout https://docs.flarum.org/extend/i18n/#appendix-a-standard-key-format
   admin:
-    my_cool_key: My Cool Key
-
+    api_key: API Key
+    token_hmac_secret_key: Token HMAC Secret Key
+    websocket_url: Websocket URL
+    api_url: API URL
+    allow_guest: Allow Guests
   forum:
+    show_updates_text: "{count, plural, one {Show # updated discussion} other {Show # updated discussions}}"

@@ -17,5 +17,6 @@
                 "../vendor/flarum/core/js/dist-typings/*"
             ]
         }
-    }
+    },
+    "module": "es2020"
 }
