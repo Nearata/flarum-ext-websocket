@@ -7,6 +7,8 @@ use Dflydev\FigCookies\FigResponseCookies;
 use Flarum\Http\CookieFactory;
 use Flarum\Http\RequestUtil;
 use Flarum\Settings\SettingsRepositoryInterface;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -32,51 +34,42 @@ class RefreshTokenController implements RequestHandlerInterface
             return new EmptyResponse(403);
         }
 
+        $type = Arr::get($request->getParsedBody(), 'generate');
+        $isChannel = Arr::get($request->getParsedBody(), 'isChannel');
+
+        if (is_null($type) || !Str::contains($type, ['main', 'discussions', 'notifications'])) {
+            return new EmptyResponse(403);
+        }
+
+        if (is_null($isChannel)) {
+            return new EmptyResponse(403);
+        }
+
         /** @var \phpcent\Client */
         $centrifugo = resolve('centrifugo');
 
         $cookies = Cookies::fromRequest($request);
-        $tokens = [];
+        $cookie = $cookies->get('flarum_nearata_websocket_' . $type);
 
-        $time = time() + 60*2;
+        $time = 60*2; // 2 minutes
+        $timestamp = time() + $time;
 
-        $main = $cookies->get('flarum_nearata_websocket');
-        $discussions = $cookies->get('flarum_nearata_websocket_discussions');
-        $notifications = $cookies->get('flarum_nearata_websocket_notifications');
+        $json = [];
 
-        if (is_null($main)) {
-            $jwt = $centrifugo->generateConnectionToken($actor->id, $time);
-            $tokens['main'] = $jwt;
+        if (is_null($cookie)) {
+            if ($isChannel) {
+                $json['token'] = $centrifugo->generateSubscriptionToken($actor->id, 'flarum:' . $type, $timestamp);
+            } else {
+                $json['token'] = $centrifugo->generateConnectionToken($actor->id, $timestamp);
+            }
         } else {
-            $tokens['main'] = $main->getValue();
+            $json['token'] = $cookie->getValue();
         }
 
-        if (is_null($discussions)) {
-            $jwt = $centrifugo->generateSubscriptionToken($actor->id, 'flarum:discussions', $time);
-            $tokens['discussions'] = $jwt;
-        } else {
-            $tokens['discussions'] = $discussions->getValue();
-        }
+        $response = new JsonResponse($json);
 
-        if (is_null($notifications)) {
-            $jwt = $centrifugo->generateSubscriptionToken($actor->id, 'flarum:notifications', $time);
-            $tokens['notifications'] = $jwt;
-        } else {
-            $tokens['notifications'] = $notifications->getValue();
-        }
-
-        $response = new JsonResponse($tokens);
-
-        if (is_null($main)) {
-            $response = FigResponseCookies::set($response, $this->cookie->make('nearata_websocket', $tokens['main'], 60*2));
-        }
-
-        if (is_null($discussions)) {
-            $response = FigResponseCookies::set($response, $this->cookie->make('nearata_websocket_discussions', $tokens['discussions'], 60*2));
-        }
-
-        if (is_null($notifications)) {
-            $response = FigResponseCookies::set($response, $this->cookie->make('nearata_websocket_notifications', $tokens['notifications'], 60*2));
+        if (is_null($cookie)) {
+            $response = FigResponseCookies::set($response, $this->cookie->make('nearata_websocket_' . $type, $json['token'], $time));
         }
 
         return $response;

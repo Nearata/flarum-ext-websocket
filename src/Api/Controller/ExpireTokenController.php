@@ -27,7 +27,7 @@ class ExpireTokenController implements RequestHandlerInterface
 
         $response = FigResponseCookies::set(
             $response,
-            $this->cookie->expire('nearata_websocket')
+            $this->cookie->expire('nearata_websocket_main')
         );
         $response = FigResponseCookies::set(
             $response,

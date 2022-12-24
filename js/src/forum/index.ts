@@ -10,9 +10,9 @@ import type { Children } from 'mithril';
 
 /** ref: https://github.com/flarum/pusher/blob/v1.6.1/js/src/forum/index.ts */
 app.initializers.add('nearata/websocket', () => {
-  const apiRequest = async (path: string) => {
+  const apiRequest = async (path: string, type: string, isChannel: boolean) => {
     return app
-      .request({ url: `${app.forum.attribute('apiUrl')}${path}`, method: 'POST' })
+      .request({ url: `${app.forum.attribute('apiUrl')}${path}`, method: 'POST', body: { generate: type, isChannel: isChannel } })
       .then((res) => {
         return res;
       })
@@ -36,24 +36,24 @@ app.initializers.add('nearata/websocket', () => {
 
     const centrifuge = new Centrifuge(wsUrl, {
       getToken: async function () {
-        const res = await apiRequest('/nearata/websocket/refreshToken');
-        return res['main'];
+        const res = await apiRequest('/nearata/websocket/refreshToken', 'main', false);
+        return res['token'];
       },
     });
     centrifuge.connect();
 
     const discussions = centrifuge.newSubscription('flarum:discussions', {
       getToken: async function (ctx) {
-        const res = await apiRequest('/nearata/websocket/refreshToken');
-        return res['discussions'];
+        const res = await apiRequest('/nearata/websocket/refreshToken', 'discussions', true);
+        return res['token'];
       },
     });
     discussions.subscribe();
 
     const notifications = centrifuge.newSubscription('flarum:notifications', {
       getToken: async function (ctx) {
-        const res = await apiRequest('/nearata/websocket/refreshToken');
-        return res['notifications'];
+        const res = await apiRequest('/nearata/websocket/refreshToken', 'notifications', true);
+        return res['token'];
       },
     });
     notifications.subscribe();
@@ -84,7 +84,7 @@ app.initializers.add('nearata/websocket', () => {
   app.pushedUpdates = [];
 
   override(Session.prototype, 'logout', function (original) {
-    const req1 = apiRequest('/nearata/websocket/expireToken');
+    const req1 = app.request({ url: `${app.forum.attribute('apiUrl')}/nearata/websocket/expireToken`, method: 'POST' });
 
     Promise.all([req1]).then(() => original());
   });
