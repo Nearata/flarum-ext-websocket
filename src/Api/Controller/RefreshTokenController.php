@@ -4,6 +4,7 @@ namespace Nearata\Websocket\Api\Controller;
 
 use Dflydev\FigCookies\Cookies;
 use Dflydev\FigCookies\FigResponseCookies;
+use Firebase\JWT\JWT;
 use Flarum\Http\CookieFactory;
 use Flarum\Http\RequestUtil;
 use Flarum\Settings\SettingsRepositoryInterface;
@@ -37,11 +38,7 @@ class RefreshTokenController implements RequestHandlerInterface
         $type = Arr::get($request->getParsedBody(), 'generate');
         $isChannel = Arr::get($request->getParsedBody(), 'isChannel');
 
-        if (is_null($type) || !Str::contains($type, ['main', 'discussions', 'notifications'])) {
-            return new EmptyResponse(403);
-        }
-
-        if (is_null($isChannel)) {
+        if (is_null($type) || is_null($isChannel) || !Str::contains($type, ['main', 'discussions', 'notifications'])) {
             return new EmptyResponse(403);
         }
 
@@ -56,7 +53,9 @@ class RefreshTokenController implements RequestHandlerInterface
 
         $json = [];
 
-        if (is_null($cookie)) {
+        $flag = is_null($cookie) || $this->isTokenExpired($cookie->getValue());
+
+        if ($flag) {
             if ($isChannel) {
                 $json['token'] = $centrifugo->generateSubscriptionToken($actor->id, 'flarum:' . $type, $timestamp);
             } else {
@@ -68,10 +67,22 @@ class RefreshTokenController implements RequestHandlerInterface
 
         $response = new JsonResponse($json);
 
-        if (is_null($cookie)) {
+        if ($flag) {
             $response = FigResponseCookies::set($response, $this->cookie->make('nearata_websocket_' . $type, $json['token'], $time));
         }
 
         return $response;
+    }
+
+    private function isTokenExpired(string $jwt): bool
+    {
+        $key = $this->settings->get('nearata-websocket.hmac-key');
+
+        try {
+            JWT::decode($jwt, $key);
+            return false;
+        } catch (\Throwable $th) {
+            return $th instanceof \Firebase\JWT\ExpiredException;
+        }
     }
 }

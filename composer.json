@@ -8,7 +8,8 @@
     "license": "Unlicense",
     "require": {
         "flarum/core": "^1.6",
-        "centrifugal/phpcent": "^5.0"
+        "centrifugal/phpcent": "^5.0",
+        "firebase/php-jwt": "^6.0"
     },
     "authors": [
         {
