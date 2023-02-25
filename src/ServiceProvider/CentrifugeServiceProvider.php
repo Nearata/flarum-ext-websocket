@@ -3,6 +3,7 @@
 namespace Nearata\Websocket\ServiceProvider;
 
 use Flarum\Foundation\AbstractServiceProvider;
+use Illuminate\Http\Client\Factory;
 
 class CentrifugeServiceProvider extends AbstractServiceProvider
 {
@@ -13,10 +14,19 @@ class CentrifugeServiceProvider extends AbstractServiceProvider
 
         $apiUrl = $settings->get('nearata-websocket.api-url');
         $apiKey = $settings->get('nearata-websocket.api-key');
-        $key = $settings->get('nearata-websocket.hmac-key');
 
-        $this->container->singleton('centrifugo', function () use ($apiUrl, $apiKey, $key) {
-            return new \phpcent\Client($apiUrl, $apiKey, $key);
+        Factory::macro('centrifugo', function () use ($apiUrl, $apiKey) {
+            return (new Factory())
+                ->withToken($apiKey, 'apikey')
+                ->baseUrl($apiUrl)
+                ->asJson();
+        });
+
+        $this->container->singleton('centrifugo.channels', function () {
+            return [
+                'discussions',
+                'notifications'
+            ];
         });
     }
 }

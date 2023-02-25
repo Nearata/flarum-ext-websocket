@@ -1,9 +1,15 @@
 nearata-websocket:
   admin:
-    api_key: API Key
-    token_hmac_secret_key: Token HMAC Secret Key
-    websocket_url: Websocket URL
-    api_url: API URL
-    allow_guest: Allow Guests
+    settings:
+      token_hmac_secret_key: Token HMAC Secret Key
+      token_hmac_secret_key_help: "Centrifugo <strong>config.json</strong> -> <strong>token_hmac_secret_key</strong>"
+      api_key: API Key
+      api_key_help: "Centrifugo <strong>config.json</strong> -> <strong>api_key</strong>"
+      websocket_url: Websocket URL
+      websocket_url_help: "You need to proxy <strong>ws://localhost:1234/connection/websocket</strong>"
+      api_url: API URL
+      api_url_help: "This has to be like <strong>http://127.0.0.1:1234</strong>"
+      jwt_exp: Jwt Expire Time
+      jwt_exp_help: In minutes
   forum:
     show_updates_text: "{count, plural, one {Show # updated discussion} other {Show # updated discussions}}"

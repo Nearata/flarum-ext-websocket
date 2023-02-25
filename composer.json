@@ -8,8 +8,8 @@
     "license": "Unlicense",
     "require": {
         "flarum/core": "^1.6",
-        "centrifugal/phpcent": "^5.0",
-        "firebase/php-jwt": "^6.0"
+        "firebase/php-jwt": "^6.0",
+        "illuminate/http": "^8.0"
     },
     "authors": [
         {
@@ -29,9 +29,10 @@
             "category": "feature",
             "icon": {
                 "image": "icon.png",
-                "backgroundSize": "100%",
+                "backgroundSize": "80%",
                 "backgroundPosition": "center",
-                "backgroundRepeat": "no-repeat"
+                "backgroundRepeat": "no-repeat",
+                "backgroundColor": "#EEE82C"
             }
         }
     }

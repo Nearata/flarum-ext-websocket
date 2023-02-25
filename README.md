@@ -1,6 +1,6 @@
 # Websocket
 
-A [Flarum](http://flarum.org) extension. Pusher replacement.
+> Pusher replacement.
 
 ## Install
 

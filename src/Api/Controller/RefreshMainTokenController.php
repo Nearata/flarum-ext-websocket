@@ -7,15 +7,12 @@ use Dflydev\FigCookies\FigResponseCookies;
 use Flarum\Http\CookieFactory;
 use Flarum\Http\RequestUtil;
 use Flarum\Settings\SettingsRepositoryInterface;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class RefreshTokenController implements RequestHandlerInterface
+class RefreshMainTokenController implements RequestHandlerInterface
 {
     use JwtTrait;
 
@@ -37,13 +34,7 @@ class RefreshTokenController implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $channel = Arr::get($request->getParsedBody(), 'channel', '');
-
-        if (empty($channel) || !Str::contains($channel, resolve('centrifugo.channels'))) {
-            return new EmptyResponse(400);
-        }
-
-        $cookie = Cookies::fromRequest($request)->get("flarum_nearata_websocket_$channel");
+        $cookie = Cookies::fromRequest($request)->get("flarum_nearata_websocket_main");
         $flag = is_null($cookie) || $this->isTokenExpired($cookie->getValue());
 
         $minutes = 60 * $this->settings->get('nearata-websocket.jwt-exp');
@@ -53,8 +44,7 @@ class RefreshTokenController implements RequestHandlerInterface
 
             $token = $this->generateToken([
                 'sub' => $actor->isGuest() ? '' : "$actor->id",
-                'exp' => time() + $minutes,
-                'channel' => "flarum:$channel"
+                'exp' => time() + $minutes
             ]);
         } else {
             $token = $cookie->getValue();
@@ -63,7 +53,7 @@ class RefreshTokenController implements RequestHandlerInterface
         $response = new JsonResponse(['token' => $token]);
 
         if ($flag) {
-            $response = FigResponseCookies::set($response, $this->cookie->make("nearata_websocket_$channel", $token, $minutes));
+            $response = FigResponseCookies::set($response, $this->cookie->make("nearata_websocket_main", $token, $minutes));
         }
 
         return $response;
