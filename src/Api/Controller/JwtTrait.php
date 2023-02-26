@@ -14,7 +14,7 @@ trait JwtTrait
         return JWT::encode($payload, $key, 'HS256');
     }
 
-    public function isTokenExpired(string $jwt): bool
+    public function isTokenValid(string $jwt): bool
     {
         $key = $this->settings->get('nearata-websocket.hmac-key');
 
@@ -22,7 +22,7 @@ trait JwtTrait
             JWT::decode($jwt, new Key($key, 'HS256'));
             return false;
         } catch (\Throwable $th) {
-            return $th instanceof \Firebase\JWT\ExpiredException;
+            return true;
         }
     }
 }
