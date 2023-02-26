@@ -3,6 +3,7 @@
 namespace Nearata\Websocket\Api\Controller;
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 trait JwtTrait
 {
@@ -18,7 +19,7 @@ trait JwtTrait
         $key = $this->settings->get('nearata-websocket.hmac-key');
 
         try {
-            JWT::decode($jwt, $key);
+            JWT::decode($jwt, new Key($key, 'HS256'));
             return false;
         } catch (\Throwable $th) {
             return $th instanceof \Firebase\JWT\ExpiredException;
