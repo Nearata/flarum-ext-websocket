@@ -44,7 +44,7 @@ class RefreshTokenController implements RequestHandlerInterface
         }
 
         $cookie = Cookies::fromRequest($request)->get("flarum_nearata_websocket_$channel");
-        $flag = is_null($cookie) || !$this->isTokenValid($cookie->getValue());
+        $flag = is_null($cookie) || $this->isTokenInvalid($cookie->getValue());
 
         $minutes = 60 * $this->settings->get('nearata-websocket.jwt-exp');
 

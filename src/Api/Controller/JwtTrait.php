@@ -14,7 +14,7 @@ trait JwtTrait
         return JWT::encode($payload, $key, 'HS256');
     }
 
-    public function isTokenValid(string $jwt): bool
+    public function isTokenInvalid(string $jwt): bool
     {
         $key = $this->settings->get('nearata-websocket.hmac-key');
 
