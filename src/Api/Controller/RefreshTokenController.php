@@ -2,7 +2,6 @@
 
 namespace Nearata\Websocket\Api\Controller;
 
-use Dflydev\FigCookies\Cookies;
 use Dflydev\FigCookies\FigResponseCookies;
 use Flarum\Http\CookieFactory;
 use Flarum\Http\RequestUtil;
@@ -43,21 +42,23 @@ class RefreshTokenController implements RequestHandlerInterface
             return new EmptyResponse(400);
         }
 
-        $cookie = Cookies::fromRequest($request)->get("flarum_nearata_websocket_$channel");
-        $flag = is_null($cookie) || $this->isTokenInvalid($cookie->getValue());
+        $actor = RequestUtil::getActor($request);
+
+        $cookieValue = $this->getCookie($request, "flarum_nearata_websocket_$channel");
+        $flag = is_null($cookieValue)
+            || $this->isTokenInvalid($cookieValue)
+            || $this->hasActorLoggedIn($cookieValue, $actor);
 
         $minutes = 60 * $this->settings->get('nearata-websocket.jwt-exp');
 
         if ($flag) {
-            $actor = RequestUtil::getActor($request);
-
             $token = $this->generateToken([
                 'sub' => $actor->isGuest() ? '' : "$actor->id",
                 'exp' => time() + $minutes,
                 'channel' => "flarum:$channel"
             ]);
         } else {
-            $token = $cookie->getValue();
+            $token = $cookieValue;
         }
 
         $response = new JsonResponse(['token' => $token]);
