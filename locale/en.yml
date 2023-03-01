@@ -6,7 +6,7 @@ nearata-websocket:
       api_key: API Key
       api_key_help: "Centrifugo <strong>config.json</strong> -> <strong>api_key</strong>"
       websocket_url: Websocket URL
-      websocket_url_help: "You need to proxy <strong>ws://localhost:1234/connection/websocket</strong>"
+      websocket_url_help: "You need to proxy <strong>http://localhost:1234/connection/websocket</strong>"
       api_url: API URL
       api_url_help: "This has to be like <strong>http://127.0.0.1:1234</strong>"
       jwt_exp: Jwt Expire Time
