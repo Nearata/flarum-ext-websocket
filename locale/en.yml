@@ -12,4 +12,4 @@ nearata-websocket:
       jwt_exp: Jwt Expire Time
       jwt_exp_help: In minutes
   forum:
-    show_updates_text: "{count, plural, one {Show # updated discussion} other {Show # updated discussions}}"
+    discussions_tooltip_label: Updates
