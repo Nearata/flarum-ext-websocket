@@ -32,8 +32,10 @@ class SendCentrifugeNotificationsJob extends AbstractJob
                 Factory::centrifugo()->post('/api', [
                     'method' => 'publish',
                     'params' => [
-                        'channel' => "flarum:notifications#$user->id",
-                        'data' => []
+                        'channel' => "flarum:#$user->id",
+                        'data' => [
+                            'type' => 'notifications'
+                        ]
                     ]
                 ]);
             }

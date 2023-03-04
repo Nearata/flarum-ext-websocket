@@ -24,8 +24,7 @@ class CentrifugeServiceProvider extends AbstractServiceProvider
 
         $this->container->singleton('centrifugo.channels', function () {
             return [
-                'discussions',
-                'notifications'
+                'discussions'
             ];
         });
     }

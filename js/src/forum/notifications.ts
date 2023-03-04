@@ -3,19 +3,25 @@ import app from "flarum/forum/app";
 
 export default function notifications() {
   app.websocket.then((websocket: Websocket) => {
-    websocket
-      .subscribeChannel(`notifications#${app.session.user?.id()}`)
-      .on("publication", function () {
-        app.session.user?.pushAttributes({
-          unreadNotificationCount:
-            (app.session.user.unreadNotificationCount() ?? 0) + 1,
-          newNotificationCount:
-            (app.session.user.newNotificationCount() ?? 0) + 1,
-        });
+    websocket.getChannel("main").on("publication", (ctx: any) => {
+      if (ctx.channel !== `flarum:#${app.session.user?.id()}`) {
+        return;
+      }
 
-        app.notifications.clear();
+      if (ctx.data.type !== "notifications") {
+        return;
+      }
 
-        m.redraw();
+      app.session.user?.pushAttributes({
+        unreadNotificationCount:
+          (app.session.user.unreadNotificationCount() ?? 0) + 1,
+        newNotificationCount:
+          (app.session.user.newNotificationCount() ?? 0) + 1,
       });
+
+      app.notifications.clear();
+
+      m.redraw();
+    });
   });
 }
