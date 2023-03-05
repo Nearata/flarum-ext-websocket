@@ -21,16 +21,22 @@ export default function discussions() {
             return;
           }
 
-          if (!app.current.matches(IndexPage)) {
+          if (!["index", "following"].includes(app.current.get("routeName"))) {
             return;
           }
 
-          const data = ctx.data;
-
-          const id = String(data.discussionId);
+          const id = String(ctx.data.discussionId);
 
           if (app.discussionsUpdates.indexOf(id) !== -1) {
             return;
+          }
+
+          if (app.current.get("routeName") === "following") {
+            const discussion = app.store.getById("discussions", id);
+
+            if (discussion?.attribute("subscription") !== "follow") {
+              return;
+            }
           }
 
           app.discussionsUpdates.push(id);
@@ -43,7 +49,7 @@ export default function discussions() {
   });
 
   extend(IndexPage.prototype, "actionItems", (items) => {
-    if (app.current.get("routeName") === "index") {
+    if (["index", "following"].includes(app.current.get("routeName"))) {
       items.setContent("refresh", DiscussionsRefreshItem.component());
     }
   });

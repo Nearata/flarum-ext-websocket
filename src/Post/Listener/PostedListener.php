@@ -3,6 +3,7 @@
 namespace Nearata\Websocket\Post\Listener;
 
 use Flarum\Post\Event\Posted;
+use Flarum\User\Guest;
 use Nearata\Websocket\Api\CentrifugoClient;
 
 class PostedListener
@@ -19,9 +20,11 @@ class PostedListener
 
     public function handle(Posted $event)
     {
-        $this->client->publish('flarum:discussions', [
-            'postId' => $event->post->id,
-            'discussionId' => $event->post->discussion->id
-        ]);
+        if ($event->post->isVisibleTo(new Guest())) {
+            $this->client->publish('flarum:discussions', [
+                'postId' => $event->post->id,
+                'discussionId' => $event->post->discussion->id
+            ]);
+        }
     }
 }
