@@ -24,4 +24,16 @@ class CentrifugoClient
             ->withBody('{"method": "channels", "params": {}}', 'application/json')
             ->post('/api');
     }
+
+    public function broadcast(array $channels, array $payload): Response
+    {
+        return Factory::centrifugo()
+            ->post('/api', [
+                'method' => 'broadcast',
+                'params' => [
+                    'channels' => $channels,
+                    'data' => $payload
+                ]
+            ]);
+    }
 }

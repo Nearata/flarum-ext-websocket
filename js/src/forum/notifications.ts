@@ -1,7 +1,7 @@
 import Websocket from "./states/Websocket";
 import app from "flarum/forum/app";
 
-export default function notifications() {
+export default function () {
   app.websocket.then((websocket: Websocket) => {
     websocket.getMain()?.on("publication", (ctx) => {
       if (ctx.channel !== `flarum:#${app.session.user?.id()}`) {

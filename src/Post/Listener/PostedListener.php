@@ -38,37 +38,43 @@ class PostedListener
                 return;
             }
 
-            $channels = $response->json('result.channels');
+            $channels = collect(array_keys($response->json('result.channels')))
+                ->map(function ($name) {
+                    return $name;
+                })
+                ->filter(function ($name) use ($event) {
+                    if (!Str::startsWith($name, 'flarum:#')) {
+                        return;
+                    }
 
-            foreach ($channels as $name => $channel) {
-                // we need personal channels
-                if (!Str::startsWith($name, 'flarum:#')) {
-                    continue;
-                }
+                    $userId = Str::after($name, 'flarum:#');
 
-                $userId = Str::after($name, 'flarum:#');
+                    if ($userId == $event->actor->id) {
+                        return;
+                    }
 
-                if ($userId == $event->actor->id) {
-                    continue;
-                }
+                    /**
+                     * @var ?User
+                     */
+                    $user = User::find($userId);
 
-                /**
-                 * @var ?User
-                 */
-                $user = User::find($userId);
+                    if (is_null($user)) {
+                        return;
+                    }
 
-                if (is_null($user)) {
-                    continue;
-                }
+                    if (!$event->post->isVisibleTo($user)) {
+                        return;
+                    }
 
-                if ($event->post->isVisibleTo($user)) {
-                    $this->client->publish($name, [
-                        'postId' => $event->post->id,
-                        'discussionId' => $event->post->discussion->id,
-                        'type' => 'discussions'
-                    ]);
-                }
-            }
+                    return $name;
+                })
+                ->all();
+
+            $this->client->broadcast($channels, [
+                'type' => 'discussions',
+                'postId' => $event->post->id,
+                'discussionId' => $event->post->discussion->id
+            ]);
         }
     }
 }

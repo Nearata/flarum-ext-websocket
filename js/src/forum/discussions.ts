@@ -7,13 +7,13 @@ import DiscussionList from "flarum/forum/components/DiscussionList";
 import IndexPage from "flarum/forum/components/IndexPage";
 
 function listener(ctx: PublicationContext) {
-  const params = app.discussions.getParams();
-
-  if (params.q || params.sort || params.filter) {
+  if (!["index", "following"].includes(app.current.get("routeName"))) {
     return;
   }
 
-  if (!["index", "following"].includes(app.current.get("routeName"))) {
+  const params = app.discussions.getParams();
+
+  if (params.q || params.sort || params.filter) {
     return;
   }
 
@@ -39,17 +39,13 @@ function listener(ctx: PublicationContext) {
   m.redraw();
 }
 
-export default function discussions() {
+export default function () {
   app.discussionsUpdates = [];
 
   extend(DiscussionList.prototype, "oncreate", function () {
     app.discussionsUpdates = [];
 
     app.websocket.then((websocket: Websocket) => {
-      websocket.subscribeChannel("discussions")?.on("publication", (ctx) => {
-        listener(ctx);
-      });
-
       websocket.getMain()?.on("publication", (ctx) => {
         if (ctx.channel !== `flarum:#${app.session.user?.id()}`) {
           return;
@@ -59,6 +55,10 @@ export default function discussions() {
           return;
         }
 
+        listener(ctx);
+      });
+
+      websocket.subscribeChannel("discussions")?.on("publication", (ctx) => {
         listener(ctx);
       });
     });
