@@ -1,16 +1,22 @@
+import type { Centrifuge as centrifuge, Subscription } from "centrifuge";
 import app from "flarum/forum/app";
 
+type Channels = {
+  [key: string]: Subscription | undefined;
+};
+
 export default class Websocket {
-  channels: any;
+  main: centrifuge | undefined;
+  channels: Channels;
 
   constructor() {
     this.channels = {};
   }
 
   init() {
-    const wsUrl = app.forum.attribute("nearataWebsocketUrl");
+    const wsUrl: string = app.forum.attribute("nearataWebsocketUrl");
 
-    const centrifuge = new Centrifuge(wsUrl, {
+    const centrifuge: centrifuge = new Centrifuge(wsUrl, {
       getToken: async function () {
         const url = app.forum.attribute("apiUrl");
 
@@ -30,7 +36,7 @@ export default class Websocket {
 
     centrifuge.connect();
 
-    this.channels["main"] = centrifuge;
+    this.main = centrifuge;
   }
 
   subscribeChannel(channel: string) {
@@ -38,7 +44,7 @@ export default class Websocket {
       return this.channels[channel];
     }
 
-    const sub = this.channels.main.newSubscription(`flarum:${channel}`, {
+    const sub = this.main?.newSubscription(`flarum:${channel}`, {
       getToken: async function () {
         const url = app.forum.attribute("apiUrl");
 
@@ -57,18 +63,18 @@ export default class Websocket {
       },
     });
 
-    sub.subscribe();
+    sub?.subscribe();
 
     this.channels[channel] = sub;
 
     return sub;
   }
 
-  getChannel(channel: string) {
-    if (!(channel in this.channels)) {
-      return null;
-    }
+  getMain() {
+    return this.main;
+  }
 
+  getChannel(channel: string) {
     return this.channels[channel];
   }
 }

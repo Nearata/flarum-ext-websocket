@@ -17,4 +17,11 @@ class CentrifugoClient
             ]
         ]);
     }
+
+    public function getChannels(): Response
+    {
+        return Factory::centrifugo()
+            ->withBody('{"method": "channels", "params": {}}', 'application/json')
+            ->post('/api');
+    }
 }

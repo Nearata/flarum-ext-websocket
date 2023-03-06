@@ -19,7 +19,8 @@ class CentrifugeServiceProvider extends AbstractServiceProvider
             return (new Factory())
                 ->withToken($apiKey, 'apikey')
                 ->baseUrl($apiUrl)
-                ->asJson();
+                ->asJson()
+                ->acceptJson();
         });
 
         $this->container->singleton('centrifugo.channels', function () {
