@@ -6,8 +6,10 @@ import app from "flarum/forum/app";
 import DiscussionList from "flarum/forum/components/DiscussionList";
 import IndexPage from "flarum/forum/components/IndexPage";
 
+const routes = ["index", "following"];
+
 function listener(ctx: PublicationContext) {
-  if (!["index", "following"].includes(app.current.get("routeName"))) {
+  if (!routes.includes(app.current.get("routeName"))) {
     return;
   }
 
@@ -65,7 +67,7 @@ export default function () {
   });
 
   extend(IndexPage.prototype, "actionItems", (items) => {
-    if (["index", "following"].includes(app.current.get("routeName"))) {
+    if (routes.includes(app.current.get("routeName"))) {
       items.setContent("refresh", DiscussionsRefreshItem.component());
     }
   });

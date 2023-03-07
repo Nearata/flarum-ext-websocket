@@ -22,11 +22,13 @@ class PostedListener
 
     public function handle(Posted $event)
     {
+        $payload = [
+            'postId' => $event->post->id,
+            'discussionId' => $event->post->discussion->id
+        ];
+
         if ($event->post->isVisibleTo(new Guest())) {
-            $this->client->publish('flarum:discussions', [
-                'postId' => $event->post->id,
-                'discussionId' => $event->post->discussion->id
-            ]);
+            $this->client->publish('flarum:discussions', $payload);
         } else {
             $response = $this->client->getChannels();
 
@@ -70,11 +72,9 @@ class PostedListener
                 })
                 ->all();
 
-            $this->client->broadcast($channels, [
-                'type' => 'discussions',
-                'postId' => $event->post->id,
-                'discussionId' => $event->post->discussion->id
-            ]);
+            $this->client->broadcast($channels, array_merge([
+                'type' => 'discussions'
+            ], $payload));
         }
     }
 }
