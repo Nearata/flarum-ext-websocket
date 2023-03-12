@@ -37,5 +37,8 @@ return [
         ->listen(Posted::class, PostedListener::class),
 
     (new Extend\Notification())
-        ->driver('websocket', CentrifugeNotificationDriver::class)
+        ->driver('websocket', CentrifugeNotificationDriver::class),
+
+    (new Extend\ErrorHandling)
+        ->status('http_bad_request', 400)
 ];

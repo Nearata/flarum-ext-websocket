@@ -9,13 +9,14 @@ class CentrifugoClient
 {
     public function publish(string $channel, array $payload): Response
     {
-        return Factory::centrifugo()->post('/api', [
-            'method' => 'publish',
-            'params' => [
-                'channel' => $channel,
-                'data' => $payload
-            ]
-        ]);
+        return Factory::centrifugo()
+            ->post('/api', [
+                'method' => 'publish',
+                'params' => [
+                    'channel' => $channel,
+                    'data' => $payload
+                ]
+            ]);
     }
 
     public function getChannels(): Response

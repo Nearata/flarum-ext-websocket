@@ -60,7 +60,7 @@ export default function () {
         listener(ctx);
       });
 
-      websocket.subscribeChannel("discussions")?.on("publication", (ctx) => {
+      websocket.subscribe("flarum:discussions")?.on("publication", (ctx) => {
         listener(ctx);
       });
     });

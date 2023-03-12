@@ -1,17 +1,8 @@
 import type { Centrifuge as centrifuge, Subscription } from "centrifuge";
 import app from "flarum/forum/app";
 
-type Channels = {
-  [key: string]: Subscription | undefined;
-};
-
 export default class Websocket {
   main: centrifuge | undefined;
-  channels: Channels;
-
-  constructor() {
-    this.channels = {};
-  }
 
   init() {
     const wsUrl: string = app.forum.attribute("nearataWebsocketUrl");
@@ -39,18 +30,21 @@ export default class Websocket {
     this.main = centrifuge;
   }
 
-  subscribeChannel(channel: string) {
-    if (channel in this.channels) {
-      return this.channels[channel];
+  subscribe(
+    channel: string,
+    endpoint: string = "/nearata/websocket/refreshChannelToken"
+  ) {
+    if (this.main?.subscriptions()[channel]) {
+      return this.main.getSubscription(channel);
     }
 
-    const sub = this.main?.newSubscription(`flarum:${channel}`, {
+    const sub = this.main?.newSubscription(channel, {
       getToken: async function () {
         const url = app.forum.attribute("apiUrl");
 
         return await app
           .request({
-            url: `${url}/nearata/websocket/refreshChannelToken`,
+            url: `${url}${endpoint}`,
             method: "POST",
             body: { channel },
           })
@@ -65,16 +59,10 @@ export default class Websocket {
 
     sub?.subscribe();
 
-    this.channels[channel] = sub;
-
     return sub;
   }
 
   getMain() {
     return this.main;
-  }
-
-  getChannel(channel: string) {
-    return this.channels[channel];
   }
 }

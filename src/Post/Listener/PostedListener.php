@@ -41,9 +41,6 @@ class PostedListener
             }
 
             $channels = collect(array_keys($response->json('result.channels')))
-                ->map(function ($name) {
-                    return $name;
-                })
                 ->filter(function ($name) use ($event) {
                     if (!Str::startsWith($name, 'flarum:#')) {
                         return;
