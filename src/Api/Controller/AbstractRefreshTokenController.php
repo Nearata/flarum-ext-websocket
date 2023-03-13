@@ -42,7 +42,7 @@ abstract class AbstractRefreshTokenController implements RequestHandlerInterface
 
         $cookieName = $this->cookieName();
 
-        $token = $this->getCookie($request, "flarum_nearata_websocket_$cookieName");
+        $token = $this->getTokenFromCookie($request, "flarum_nearata_websocket_$cookieName");
         $flag = is_null($token)
             || $this->isTokenInvalid($token)
             || $this->hasActorLoggedIn($token, $actor);
@@ -119,7 +119,7 @@ abstract class AbstractRefreshTokenController implements RequestHandlerInterface
         return empty($payload->sub) && !$actor->isGuest();
     }
 
-    private function getCookie(ServerRequestInterface $request, string $name): ?string
+    private function getTokenFromCookie(ServerRequestInterface $request, string $name): ?string
     {
         $cookie = Cookies::fromRequest($request)->get("flarum_nearata_websocket_$name");
 
