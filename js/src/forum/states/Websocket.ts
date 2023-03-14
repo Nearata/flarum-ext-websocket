@@ -1,4 +1,4 @@
-import type { Centrifuge as centrifuge, Subscription } from "centrifuge";
+import type { Centrifuge as centrifuge } from "centrifuge";
 import app from "flarum/forum/app";
 
 export default class Websocket {
@@ -30,15 +30,21 @@ export default class Websocket {
     this.main = centrifuge;
   }
 
+  getMain() {
+    return this.main;
+  }
+
   subscribe(
     channel: string,
     endpoint: string = "/nearata/websocket/refreshChannelToken"
   ) {
-    if (this.main?.subscriptions()[channel]) {
-      return this.main.getSubscription(channel);
+    let sub = this.main?.getSubscription(channel);
+
+    if (sub) {
+      return sub;
     }
 
-    const sub = this.main?.newSubscription(channel, {
+    sub = this.main?.newSubscription(channel, {
       getToken: async function () {
         const url = app.forum.attribute("apiUrl");
 
@@ -62,7 +68,14 @@ export default class Websocket {
     return sub;
   }
 
-  getMain() {
-    return this.main;
+  unsubscribe(channel: string) {
+    const sub = this.main?.getSubscription(channel);
+
+    if (sub) {
+      sub.unsubscribe();
+      sub.removeAllListeners();
+
+      this.main?.removeSubscription(sub);
+    }
   }
 }

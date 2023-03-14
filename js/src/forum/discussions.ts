@@ -44,31 +44,43 @@ function listener(ctx: PublicationContext) {
 export default function () {
   app.discussionsUpdates = [];
 
-  extend(DiscussionList.prototype, "oncreate", function () {
-    app.discussionsUpdates = [];
-
-    app.websocket.then((websocket: Websocket) => {
-      websocket.getMain()?.on("publication", (ctx) => {
-        if (ctx.channel !== `flarum:#${app.session.user?.id()}`) {
-          return;
-        }
-
-        if (ctx.data.type !== "discussions") {
-          return;
-        }
-
-        listener(ctx);
-      });
-
-      websocket.subscribe("flarum:discussions")?.on("publication", (ctx) => {
-        listener(ctx);
-      });
-    });
-  });
-
   extend(IndexPage.prototype, "actionItems", (items) => {
     if (routes.includes(app.current.get("routeName"))) {
       items.setContent("refresh", DiscussionsRefreshItem.component());
     }
+  });
+
+  extend(DiscussionList.prototype, "oninit", function () {
+    this.listener1 = function (ctx: PublicationContext) {
+      if (ctx.channel !== `flarum:#${app.session.user?.id()}`) {
+        return;
+      }
+
+      if (ctx.data.type !== "discussions") {
+        return;
+      }
+
+      listener(ctx);
+    };
+  });
+
+  extend(DiscussionList.prototype, "oncreate", function () {
+    app.discussionsUpdates = [];
+
+    app.websocket.then((websocket: Websocket) => {
+      websocket.getMain()?.on("publication", this.listener1);
+
+      websocket
+        .subscribe("flarum:discussions")
+        ?.on("publication", listener.bind(this));
+    });
+  });
+
+  extend(DiscussionList.prototype, "onremove", function () {
+    app.websocket.then((websocket: Websocket) => {
+      websocket.getMain()?.removeListener("publication", this.listener1);
+
+      websocket.unsubscribe("flarum:discussions");
+    });
   });
 }
