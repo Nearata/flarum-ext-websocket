@@ -42,7 +42,7 @@ abstract class AbstractRefreshTokenController implements RequestHandlerInterface
 
         $cookieName = $this->cookieName();
 
-        $token = $this->getTokenFromCookie($request, "flarum_nearata_websocket_$cookieName");
+        $token = $this->getTokenFromCookie($request, $cookieName);
         $flag = is_null($token)
             || $this->isTokenInvalid($token)
             || $this->hasActorLoggedIn($token, $actor);
