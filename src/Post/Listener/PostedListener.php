@@ -6,25 +6,19 @@ use Flarum\Post\Event\Posted;
 use Flarum\User\Guest;
 use Flarum\User\User;
 use Illuminate\Support\Str;
-use Nearata\Websocket\Api\CentrifugoClient;
+use Nearata\Websocket\CentrifugoClient;
 
 class PostedListener
 {
-    /**
-     * @var CentrifugoClient
-     */
-    protected $client;
-
-    public function __construct(CentrifugoClient $client)
+    public function __construct(protected CentrifugoClient $client)
     {
-        $this->client = $client;
     }
 
     public function handle(Posted $event)
     {
         $payload = [
             'postId' => $event->post->id,
-            'discussionId' => $event->post->discussion->id
+            'discussionId' => $event->post->discussion->id,
         ];
 
         if ($event->post->isVisibleTo(new Guest())) {
@@ -32,17 +26,17 @@ class PostedListener
         } else {
             $response = $this->client->getChannels();
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return;
             }
 
-            if (!is_null($response->json('error'))) {
+            if (! is_null($response->json('error'))) {
                 return;
             }
 
             $channels = collect(array_keys($response->json('result.channels')))
                 ->filter(function ($name) use ($event) {
-                    if (!Str::startsWith($name, 'flarum:#')) {
+                    if (! Str::startsWith($name, 'flarum:#')) {
                         return;
                     }
 
@@ -61,7 +55,7 @@ class PostedListener
                         return;
                     }
 
-                    if (!$event->post->isVisibleTo($user)) {
+                    if (! $event->post->isVisibleTo($user)) {
                         return;
                     }
 
@@ -70,7 +64,7 @@ class PostedListener
                 ->all();
 
             $this->client->broadcast($channels, array_merge([
-                'type' => 'discussions'
+                'type' => 'discussions',
             ], $payload));
         }
     }

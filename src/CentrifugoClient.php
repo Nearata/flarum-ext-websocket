@@ -1,6 +1,6 @@
 <?php
 
-namespace Nearata\Websocket\Api;
+namespace Nearata\Websocket;
 
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\Response;
@@ -14,16 +14,16 @@ class CentrifugoClient
                 'method' => 'publish',
                 'params' => [
                     'channel' => $channel,
-                    'data' => $payload
-                ]
+                    'data' => $payload,
+                ],
             ]);
     }
 
     public function getChannels(): Response
     {
         return Factory::centrifugo()
-            ->withBody('{"method": "channels", "params": {}}', 'application/json')
-            ->post('/api');
+            ->post('/api')
+            ->withBody('{"method": "channels", "params": {}}', 'application/json');
     }
 
     public function broadcast(array $channels, array $payload): Response
@@ -33,8 +33,8 @@ class CentrifugoClient
                 'method' => 'broadcast',
                 'params' => [
                     'channels' => $channels,
-                    'data' => $payload
-                ]
+                    'data' => $payload,
+                ],
             ]);
     }
 }

@@ -13,6 +13,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class ExpireTokenController implements RequestHandlerInterface
 {
     protected $settings;
+
     protected $cookie;
 
     public function __construct(SettingsRepositoryInterface $settings, CookieFactory $cookie)

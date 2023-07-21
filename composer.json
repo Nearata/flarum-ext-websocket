@@ -7,9 +7,13 @@
     "type": "flarum-extension",
     "license": "Unlicense",
     "require": {
-        "flarum/core": "^1.6.0",
+        "php": "^8.0",
+        "flarum/core": "^1.8.0",
         "firebase/php-jwt": "^6.0",
         "illuminate/http": "^8.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.5.0"
     },
     "authors": [
         {
@@ -35,5 +39,8 @@
                 "backgroundColor": "#EEE82C"
             }
         }
+    },
+    "scripts": {
+        "format": "pint src"
     }
 }

@@ -34,9 +34,9 @@ class SendCentrifugeNotificationsJob extends AbstractJob
                     'params' => [
                         'channel' => "flarum:#$user->id",
                         'data' => [
-                            'type' => 'notifications'
-                        ]
-                    ]
+                            'type' => 'notifications',
+                        ],
+                    ],
                 ]);
             }
         }

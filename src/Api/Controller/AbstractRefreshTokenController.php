@@ -20,20 +20,10 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 abstract class AbstractRefreshTokenController implements RequestHandlerInterface
 {
-    /**
-     * @var SettingsRepositoryInterface
-     */
-    protected $settings;
-
-    /**
-     * @var CookieFactory
-     */
-    protected $cookie;
-
-    public function __construct(SettingsRepositoryInterface $settings, CookieFactory $cookie)
+    public function __construct(
+        protected SettingsRepositoryInterface $settings,
+        protected CookieFactory $cookie)
     {
-        $this->settings = $settings;
-        $this->cookie = $cookie;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -52,12 +42,12 @@ abstract class AbstractRefreshTokenController implements RequestHandlerInterface
         if ($flag) {
             $payload = [
                 'sub' => $actor->isGuest() ? '' : "$actor->id",
-                'exp' => time() + $minutes
+                'exp' => time() + $minutes,
             ];
 
             if ($this->isChannel()) {
                 $payload += [
-                    'channel' => $this->getChannel($request)
+                    'channel' => $this->getChannel($request),
                 ];
             }
 
@@ -84,7 +74,7 @@ abstract class AbstractRefreshTokenController implements RequestHandlerInterface
     {
         $channel = Arr::get($request->getParsedBody(), 'channel', '');
 
-        if (empty($channel) || !Str::contains($channel, resolve('centrifugo.channels'))) {
+        if (empty($channel) || ! Str::contains($channel, resolve('centrifugo.channels'))) {
             throw new BadRequestException;
         }
 
@@ -104,6 +94,7 @@ abstract class AbstractRefreshTokenController implements RequestHandlerInterface
 
         try {
             JWT::decode($jwt, new Key($key, 'HS256'));
+
             return false;
         } catch (\Throwable $th) {
             return true;
@@ -116,13 +107,13 @@ abstract class AbstractRefreshTokenController implements RequestHandlerInterface
 
         $payload = JWT::decode($jwt, new Key($key, 'HS256'));
 
-        return empty($payload->sub) && !$actor->isGuest();
+        return empty($payload->sub) && ! $actor->isGuest();
     }
 
     private function getTokenFromCookie(ServerRequestInterface $request, string $name): ?string
     {
         $cookie = Cookies::fromRequest($request)->get("flarum_nearata_websocket_$name");
 
-        return !is_null($cookie) && !is_null($cookie->getValue()) ? $cookie->getValue() : null;
+        return $cookie?->getValue();
     }
 }

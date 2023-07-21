@@ -25,7 +25,7 @@ class CentrifugeServiceProvider extends AbstractServiceProvider
 
         $this->container->singleton('centrifugo.channels', function () {
             return [
-                'flarum:discussions'
+                'flarum:discussions',
             ];
         });
     }
